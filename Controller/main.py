@@ -1,18 +1,23 @@
 from __future__ import print_function  # allows end=''
-import os, fileinput
+from pathlib import Path
+from Controller import helper as coh
+import fileinput
 
 
 class FeedList(object):
 
     @staticmethod
     def start(x):
+        if not Path(x).is_file():
+            return False
         #  Back up the original file
         return fileinput.FileInput(x, inplace=True, backup='.bak')
 
-    def read_file(self, start_div, end_div, sub_one, sub_two, line):
+    @staticmethod
+    def read_file(start_div, end_div, sub_one, sub_two, line):
         list_numbers = [
-            '+19999999999',  # Mom
-            '+17777777777',
+            '+16146666666',
+            '+16147777777',
         ]
 
         #  Find the starting position number of our html
@@ -33,11 +38,11 @@ class FeedList(object):
             #  example: <broad>
             #               <narrow></narrow>
             #           </broad>
-            sub_range = self.sub_search(sub_one, sub_two, range_in_line)
+            sub_range = coh.sub_search(sub_one, sub_two, range_in_line)
 
             #  Find phone number and change to a universal format
             #  example: 614-614-2699 & 16146142699 to +16146142699
-            format_number = self.scrubbed(sub_range)
+            format_number = coh.scrubbed(sub_range)
 
             #  Replace the cleaned phone number in our broad range line
             fresh_clean = range_in_line.replace(sub_range, format_number)
@@ -56,50 +61,4 @@ class FeedList(object):
                 return "{}<!-- {} -->{}".format("\n", fc, "\n")
 
         # This line doesn't have the ranged html that we're search for
-        else:
-            return line
-
-    @staticmethod
-    def scrubbed(var, sym="+"):
-        #  address="614-216-2423" address="+1 614-273-4873"
-
-        nn = list(var.replace('-', "").replace(' ', ''))
-
-        if len(nn) != 0:
-            if nn[0] is not sym:
-                nn.insert(0, sym)
-
-            if nn[1] is not "1":
-                nn.insert(1, "1")
-
-            return ''.join(nn)
-
-        return var
-
-    @staticmethod
-    def sub_search(start='', last='', line=''):
-
-        try:
-            s = line.index(start) + len(start)
-            e = line.index(last, s) - 2
-            return line[s:e]
-
-        except ValueError:
-            return ""
-
-    @staticmethod
-    def whitespace(x, y=()):
-        if y is ():
-            return x.replace(" ", "")
-        else:
-            return y.strip()  # remove from left and right position
-
-    @staticmethod
-    def reset():
-        os.system('clear')
-
-    def search_file(self, path=''):
-        pass
-
-    def comment_out_line(self):
-        pass
+        return line
